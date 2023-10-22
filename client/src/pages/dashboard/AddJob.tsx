@@ -20,8 +20,8 @@ export default function AddJob() {
     position: "",
     company: "",
     location: user?.location || "",
-    jobType: "",
-    status: "",
+    jobType: "full-time",
+    status: "pending",
     isAlert: false,
   });
   const { position, company, location, jobType, status, isAlert } = formState;
@@ -34,6 +34,7 @@ export default function AddJob() {
     if (!position || !company || !location) {
       return setFormState({ ...formState, isAlert: true });
     }
+
     createJob({ position, company, location, jobType, status });
   }
 

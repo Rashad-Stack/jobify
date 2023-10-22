@@ -1,10 +1,10 @@
-import { CustomError } from "../../types";
+import { CustomError, Jobs } from "../../types";
 import apiSlice from "../api/apiSlice";
 import { clearUser } from "../auth/authSlice";
 
 const jobApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    createJob: builder.mutation({
+    createJob: builder.mutation<Jobs, Partial<Jobs>>({
       query: (body) => ({
         url: "/jobs",
         method: "POST",
@@ -13,11 +13,15 @@ const jobApi = apiSlice.injectEndpoints({
       async onQueryStarted(data, { queryFulfilled, dispatch }) {
         try {
           const { data: job } = await queryFulfilled;
-          //   dispatch(
-          //     apiSlice.util.updateQueryData("getJobs", undefined, (draft) => {
-          //       draft.push(job);
-          //     })
-          //   );
+          dispatch(
+            apiSlice.util.updateQueryData(
+              "getJobs" as unknown as never,
+              undefined as unknown as never,
+              (draft: { jobs: Jobs[] }) => {
+                draft?.jobs.push(job);
+              }
+            )
+          );
         } catch (error) {
           if ((error as CustomError).error?.status === 401) {
             dispatch(clearUser());
@@ -26,7 +30,13 @@ const jobApi = apiSlice.injectEndpoints({
         }
       },
     }),
+    getJobs: builder.query({
+      query: () => ({
+        url: "/jobs",
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useCreateJobMutation } = jobApi;
+export const { useCreateJobMutation, useGetJobsQuery } = jobApi;

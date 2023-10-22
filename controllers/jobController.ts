@@ -19,8 +19,11 @@ export const createJob = async (req: Request, res: Response) => {
 
   res.status(StatusCodes.CREATED).json(job);
 };
-export const getAllJobs = (req: Request, res: Response) => {
-  res.send("Get all Jobs");
+export const getAllJobs = async (req: Request, res: Response) => {
+  const jobs = await Job.find({ createdBy: (req as any).user._id }).sort({
+    createdAt: -1,
+  });
+  res.status(StatusCodes.OK).json({ jobs, totalJobs: jobs.length, page: 1 });
 };
 export const updateJob = (req: Request, res: Response) => {
   res.send("Update Job");

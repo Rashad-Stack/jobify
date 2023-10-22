@@ -40,3 +40,14 @@ export interface CustomError extends Error {
     message: string;
   };
 }
+
+export interface Jobs {
+  readonly _id: string;
+  position: string;
+  status: string;
+  jobType: string;
+  company: string;
+  location: string;
+  createdBy: string;
+  createdAt: string;
+}

@@ -1,3 +1,9 @@
+import JobContainer from "../../components/JobContainer";
+
 export default function AllJobs() {
-  return <div>AllJobs</div>;
+  return (
+    <>
+      <JobContainer />
+    </>
+  );
 }
