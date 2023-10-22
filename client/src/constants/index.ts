@@ -26,3 +26,6 @@ export const links = [
     icon: ImProfile,
   },
 ];
+
+export const jobTypes = ["full-time", "part-time", "remote", "internship"];
+export const jobStatus = ["interview", "declined", "pending"];
