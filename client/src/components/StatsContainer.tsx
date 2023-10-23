@@ -1,6 +1,6 @@
 import { FaBug, FaCalendarCheck, FaSuitcaseRolling } from "react-icons/fa";
 import styled from "styled-components";
-import { useGetStatsQuery } from "../features/job/jobApi";
+import useStats from "../hooks/useStats";
 import StatItem from "./StatItem";
 
 const Wrapper = styled.section`
@@ -16,26 +16,26 @@ const Wrapper = styled.section`
   }
 `;
 export default function StatsContainer() {
-  const { data: stats } = useGetStatsQuery(undefined, {});
+  const { stats } = useStats();
 
   const defaultStats = [
     {
       title: "pending applications",
-      count: stats?.defaultStats?.pending || 0,
+      count: stats?.pending || 0,
       icon: <FaSuitcaseRolling />,
       color: "#e9b949",
       bcg: "#fcefc7",
     },
     {
       title: "interviews scheduled",
-      count: stats?.defaultStats?.interview || 0,
+      count: stats?.interview || 0,
       icon: <FaCalendarCheck />,
       color: "#647acb",
       bcg: "#e0e8f9",
     },
     {
       title: "jobs declined",
-      count: stats?.defaultStats?.declined || 0,
+      count: stats?.declined || 0,
       icon: <FaBug />,
       color: "#d66a6a",
       bcg: "#ffeeee",

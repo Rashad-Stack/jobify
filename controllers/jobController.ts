@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import moment from "moment";
 import mongoose from "mongoose";
 import Job from "../models/job";
 import AppError from "../utils/appError";
@@ -172,7 +173,54 @@ export const showStats = async (req: Request, res: Response) => {
     declined: formateStats.declined || 0,
   };
 
-  res.status(StatusCodes.OK).json({ defaultStats });
+  const applicationsAggregate = await Job.aggregate([
+    {
+      $match: { createdBy: new mongoose.Types.ObjectId((req as any).user._id) },
+    },
+    {
+      $group: {
+        _id: {
+          year: {
+            $year: "$createdAt",
+          },
+          month: {
+            $month: "$createdAt",
+          },
+        },
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: {
+        "_id.year": -1,
+        "_id.month": -1,
+      },
+    },
+    {
+      $limit: 6,
+    },
+  ]);
+
+  const weeklyApplications = applicationsAggregate
+    .map((item) => {
+      const {
+        _id: { year, month },
+        count,
+      } = item;
+
+      const date = moment()
+        .month(month - 1)
+        .year(year)
+        .format("MMM y");
+
+      return {
+        date,
+        count,
+      };
+    })
+    .reverse();
+
+  res.status(StatusCodes.OK).json({ defaultStats, weeklyApplications });
 
   res.send("Show stats");
 };
