@@ -134,7 +134,7 @@ export default function Job({
         </div>
         <footer>
           <div className="actions">
-            <Link to="/add-job" className="btn edit-btn" onClick={() => null}>
+            <Link to={`/edit-job/${_id}`} className="btn edit-btn">
               Edit
             </Link>
             <button

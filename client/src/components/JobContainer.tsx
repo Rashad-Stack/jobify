@@ -27,17 +27,8 @@ const Wrapper = styled.section`
   }
 `;
 export default function JobContainer() {
-  const { data, isLoading, isError, error, isSuccess } = useGetJobsQuery(
-    undefined,
-    {
-      refetchOnFocus: true,
-      refetchOnReconnect: true,
-      skip: false,
-    }
-  );
-  const { jobs = [], totalJobs, page } = data || {};
-
-  console.log(jobs);
+  const { data, isLoading, isError, error, isSuccess } = useGetJobsQuery();
+  const { jobs = [], totalJobs } = data || {};
 
   return isLoading ? (
     <Loading />

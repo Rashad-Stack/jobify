@@ -26,6 +26,7 @@ function App() {
             <Route index element={<Stats />} />
             <Route path="all-jobs" element={<AllJobs />} />
             <Route path="add-job" element={<AddJob />} />
+            <Route path="edit-job/:id" element={<AddJob isEdit={true} />} />
             <Route path="profile" element={<Profile />} />
           </Route>
           <Route path="register" element={<Register />} />

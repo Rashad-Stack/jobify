@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Alert from "../../components/Alert";
 import DashboardFormWrapper from "../../components/DashboardFormWrapper";
 import FormRow from "../../components/FormRow";
@@ -11,19 +11,38 @@ import { jobStatus, jobTypes } from "../../constants";
 import { selectUser } from "../../features/auth/authSlice";
 import useJob from "../../hooks/useJob";
 
-export default function AddJob() {
+interface AddJobProps {
+  isEdit?: boolean;
+}
+
+export default function AddJob({ isEdit = false }: AddJobProps) {
   const user = useSelector(selectUser);
-  const { createJob, isLoading, error, isError, isSuccess } = useJob();
+
+  const params = useParams();
+
+  const {
+    job,
+    createJob,
+    updateJob,
+    isLoading,
+    getJobLoading,
+    getJobIsSuccess,
+    error,
+    isError,
+    isSuccess,
+  } = useJob(isEdit, params?.id);
+
   const [successAlert, setSuccessAlert] = useState<boolean>(false);
 
   const [formState, setFormState] = useState({
-    position: "",
-    company: "",
-    location: user?.location || "",
-    jobType: "full-time",
-    status: "pending",
+    position: job?.position || "",
+    company: job?.company || "",
+    location: job?.location || user?.location || "",
+    jobType: job?.jobType || "full-time",
+    status: job?.status || "pending",
     isAlert: false,
   });
+
   const { position, company, location, jobType, status, isAlert } = formState;
 
   const navigate = useNavigate();
@@ -35,7 +54,12 @@ export default function AddJob() {
       return setFormState({ ...formState, isAlert: true });
     }
 
-    createJob({ position, company, location, jobType, status });
+    isEdit
+      ? updateJob({
+          id: params.id,
+          body: { position, company, location, jobType, status },
+        })
+      : createJob({ position, company, location, jobType, status });
   }
 
   function handleChange(
@@ -76,10 +100,25 @@ export default function AddJob() {
     };
   }, [isSuccess, navigate]);
 
-  return (
+  useEffect(() => {
+    if (isEdit && getJobIsSuccess) {
+      setFormState((f) => ({
+        ...f,
+        position: job?.position,
+        company: job?.company,
+        location: job?.location,
+        jobType: job?.jobType,
+        status: job?.status,
+      }));
+    }
+  }, [getJobIsSuccess, isEdit, user, job]);
+
+  return getJobLoading ? (
+    <h1>Loading...</h1>
+  ) : (
     <DashboardFormWrapper>
       <form className="form" onSubmit={handlePostJob}>
-        <h3>Add Job</h3>
+        <h3>{isEdit ? "Update Job" : "Add Job"}</h3>
 
         {isAlert && <Alert />}
         {isError && <Alert message={error} type="error" />}
@@ -129,7 +168,13 @@ export default function AddJob() {
               type="submit"
               className="btn btn-block submit-btn"
               disabled={isLoading}>
-              {isLoading ? <LoaderSmall title="Posting..." /> : "Post"}
+              {isLoading ? (
+                <LoaderSmall title={isEdit ? "Updating" : "Posting"} />
+              ) : isEdit ? (
+                "Update"
+              ) : (
+                "Post"
+              )}
             </button>
             <button
               type="button"
