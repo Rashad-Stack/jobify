@@ -26,12 +26,12 @@ const Wrapper = styled.section`
 `;
 export default function JobContainer() {
   const { data } = useGetJobsQuery();
-  const { jobs = [], totalJobs } = data || {};
+  const { jobs = [] } = data || {};
 
   return (
     <Wrapper>
       <h5>
-        {totalJobs} job{jobs.length > 1 && "s"} found
+        {jobs.length} job{jobs.length > 1 && "s"} found
       </h5>
       <div className="jobs">
         {jobs.map((job: Jobs) => (

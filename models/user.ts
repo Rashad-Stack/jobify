@@ -51,8 +51,8 @@ const userSchema: Schema<UserTypes> = new mongoose.Schema({
 });
 
 userSchema.pre("save", function () {
-  // const salt =  bcrypt.genSaltSync(10);
-  // this.password =  bcrypt.hashSync(this.password, salt);
+  const salt = bcrypt.genSaltSync(10);
+  this.password = bcrypt.hashSync(this.password, salt);
 });
 
 userSchema.methods.createAuthToken = function (): string {

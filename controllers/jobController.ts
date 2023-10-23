@@ -29,7 +29,10 @@ export const getAllJobs = async (req: Request, res: Response) => {
 export const getJob = async (req: Request, res: Response) => {
   const id = req.params.id;
   console.log(id);
-  const job = await Job.findById(id);
+  const job = await Job.findOne({
+    _id: id,
+    createdBy: (req as any).user._id,
+  });
 
   if (!job) {
     res.status(StatusCodes.NOT_FOUND).json({
@@ -62,6 +65,22 @@ export const updateJob = async (req: Request, res: Response) => {
     throw new AppError("Please provide all values!", StatusCodes.BAD_REQUEST);
   }
 
+  // Check if user Authorize to edited the job
+  const authorizeJob = await Job.findOne({
+    _id: id,
+    createdBy: (req as any).user._id,
+  });
+  if (!authorizeJob) {
+    res.status(StatusCodes.UNAUTHORIZED).json({
+      status: "error",
+      message: "you are not authorized or Job no longer exists!",
+    });
+    throw new AppError(
+      "you are not authorized or Job no longer exists!",
+      StatusCodes.UNAUTHORIZED
+    );
+  }
+
   const job = await Job.findByIdAndUpdate(id, req.body, {
     new: true,
     runValidators: true,
@@ -90,8 +109,24 @@ export const deleteJob = async (req: Request, res: Response) => {
     throw new AppError("Please provide an ID!", StatusCodes.BAD_REQUEST);
   }
 
-  const job = await Job.findByIdAndDelete(id);
+  // Check if user Authorize to edited the job
+  const authorizeJob = await Job.findOne({
+    _id: id,
+    createdBy: (req as any).user._id,
+  });
+  if (!authorizeJob) {
+    res.status(StatusCodes.UNAUTHORIZED).json({
+      status: "error",
+      message: "you are not authorized or Job no longer exists!",
+    });
+    throw new AppError(
+      "you are not authorized or Job no longer exists!",
+      StatusCodes.UNAUTHORIZED
+    );
+  }
 
+  // Check if Job Exist
+  const job = await Job.findByIdAndDelete(id);
   if (!job) {
     res.status(StatusCodes.NOT_FOUND).json({
       status: "error",

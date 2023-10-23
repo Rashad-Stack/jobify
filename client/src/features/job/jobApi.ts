@@ -58,6 +58,7 @@ const jobApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body,
       }),
+
       async onQueryStarted(arg, { queryFulfilled, dispatch }) {
         try {
           const { data: updatedJob } = await queryFulfilled;
@@ -65,7 +66,7 @@ const jobApi = apiSlice.injectEndpoints({
           dispatch(
             apiSlice.util.updateQueryData(
               "getJobs" as unknown as never,
-              arg.id as unknown as never,
+              undefined as unknown as never,
               (draft: { jobs: Jobs[] }) => {
                 const draftedJob: Jobs | undefined = draft?.jobs.find(
                   (job) => job._id === updatedJob._id
@@ -104,8 +105,7 @@ const jobApi = apiSlice.injectEndpoints({
                 );
 
                 if (jobIndex !== -1) {
-                  draft?.jobs.splice(jobIndex, 1);
-                  draft.totalJobs -= 1;
+                  draft.jobs.splice(jobIndex, 1);
                 }
               }
             )
