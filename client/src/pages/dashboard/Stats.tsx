@@ -1,3 +1,9 @@
+import StatsContainer from "../../components/StatsContainer";
+
 export default function Stats() {
-  return <div>Stats</div>;
+  return (
+    <>
+      <StatsContainer />
+    </>
+  );
 }

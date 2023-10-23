@@ -16,6 +16,6 @@ router.use(authenticatedUser);
 
 router.route("/").get(getAllJobs).post(createJob);
 router.route("/:id").get(getJob).patch(updateJob).delete(deleteJob);
-router.get("/stats", showStats);
+router.get("/user/stats", showStats);
 
 export default router;

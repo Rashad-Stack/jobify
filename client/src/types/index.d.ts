@@ -51,3 +51,9 @@ export interface Jobs {
   createdBy: string;
   createdAt: string;
 }
+
+export interface IStats {
+  pending: number;
+  interview: number;
+  declined: number;
+}

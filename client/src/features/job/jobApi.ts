@@ -118,6 +118,12 @@ const jobApi = apiSlice.injectEndpoints({
         }
       },
     }),
+    getStats: builder.query({
+      query: () => ({
+        url: "/jobs/user/stats",
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -127,4 +133,5 @@ export const {
   useGetJobQuery,
   useUpdateJobMutation,
   useDeleteJobMutation,
+  useGetStatsQuery,
 } = jobApi;

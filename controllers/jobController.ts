@@ -1,7 +1,14 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import mongoose from "mongoose";
 import Job from "../models/job";
 import AppError from "../utils/appError";
+
+type IStats = {
+  pending: number;
+  interview: number;
+  declined: number;
+};
 
 export const createJob = async (req: Request, res: Response) => {
   const { position, company } = req.body;
@@ -140,6 +147,32 @@ export const deleteJob = async (req: Request, res: Response) => {
     message: "Job deleted!",
   });
 };
-export const showStats = (req: Request, res: Response) => {
+export const showStats = async (req: Request, res: Response) => {
+  const stats = await Job.aggregate([
+    {
+      $match: { createdBy: new mongoose.Types.ObjectId((req as any).user._id) },
+    },
+    {
+      $group: {
+        _id: "$status",
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const formateStats: IStats = stats.reduce((acc, curr) => {
+    const { _id: title, count } = curr;
+    acc[title] = count;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const defaultStats = {
+    pending: formateStats.pending || 0,
+    interview: formateStats.interview || 0,
+    declined: formateStats.declined || 0,
+  };
+
+  res.status(StatusCodes.OK).json({ defaultStats });
+
   res.send("Show stats");
 };
