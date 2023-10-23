@@ -2,6 +2,7 @@ import moment from "moment";
 import { FaBriefcase, FaCalendarAlt, FaLocationArrow } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { useDeleteJobMutation } from "../features/job/jobApi";
 import { Jobs } from "../types";
 import JobInfo from "./JobInfo";
 
@@ -106,14 +107,16 @@ const Wrapper = styled.article`
     visibility: visible;
   }
 `;
-export default function Job({
-  _id,
-  company,
-  status,
-  jobType,
-  location,
-  createdAt,
-}: Jobs) {
+
+interface JobProps {
+  job: Jobs;
+}
+
+export default function Job({ job }: JobProps) {
+  const { _id, jobType, company, location, status, createdAt } = job || {};
+
+  const [deleteJob] = useDeleteJobMutation();
+
   let date = moment(createdAt).format("dddd, MMMM Do YYYY");
 
   return (
@@ -129,7 +132,7 @@ export default function Job({
         <div className="content-center">
           <JobInfo icon={<FaLocationArrow />} text={location} />
           <JobInfo icon={<FaCalendarAlt />} text={date} />
-          <JobInfo icon={<FaBriefcase />} text="Remote" />
+          <JobInfo icon={<FaBriefcase />} text={jobType} />
           <div className={`status ${status}`}>{status}</div>
         </div>
         <footer>
@@ -140,7 +143,7 @@ export default function Job({
             <button
               type="button"
               className="btn delete-btn"
-              onClick={() => null}>
+              onClick={() => deleteJob(_id)}>
               Delete
             </button>
           </div>

@@ -45,7 +45,13 @@ export const getJob = async (req: Request, res: Response) => {
 export const updateJob = async (req: Request, res: Response) => {
   const id = req.params.id;
 
-  console.log(req.body);
+  if (!id) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      status: "error",
+      message: "Please provide an ID",
+    });
+    throw new AppError("Please provide an ID!", StatusCodes.BAD_REQUEST);
+  }
 
   const { position, company } = req.body;
   if (!position || !company) {
@@ -56,12 +62,48 @@ export const updateJob = async (req: Request, res: Response) => {
     throw new AppError("Please provide all values!", StatusCodes.BAD_REQUEST);
   }
 
-  const job = await Job.findByIdAndUpdate(id, req.body);
+  const job = await Job.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!job) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      status: "error",
+      message: "Job no longer exists!",
+    });
+    throw new AppError("Job no longer exists!", StatusCodes.NOT_FOUND);
+  }
+
+  console.log(job);
 
   res.status(StatusCodes.OK).json(job);
 };
-export const deleteJob = (req: Request, res: Response) => {
-  res.send("Delete Job");
+export const deleteJob = async (req: Request, res: Response) => {
+  const id = req.params.id;
+
+  if (!id) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      status: "error",
+      message: "Please provide an ID",
+    });
+    throw new AppError("Please provide an ID!", StatusCodes.BAD_REQUEST);
+  }
+
+  const job = await Job.findByIdAndDelete(id);
+
+  if (!job) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      status: "error",
+      message: "Job no longer exists!",
+    });
+    throw new AppError("Job no longer exists!", StatusCodes.NOT_FOUND);
+  }
+
+  res.status(StatusCodes.OK).json({
+    status: "success",
+    message: "Job deleted!",
+  });
 };
 export const showStats = (req: Request, res: Response) => {
   res.send("Show stats");

@@ -1,8 +1,6 @@
 import styled from "styled-components";
 import { useGetJobsQuery } from "../features/job/jobApi";
-import Loading from "../pages/Loading";
-import { CustomError } from "../types";
-import Alert from "./Alert";
+import { Jobs } from "../types";
 import Job from "./Job";
 
 const Wrapper = styled.section`
@@ -27,28 +25,19 @@ const Wrapper = styled.section`
   }
 `;
 export default function JobContainer() {
-  const { data, isLoading, isError, error, isSuccess } = useGetJobsQuery();
+  const { data } = useGetJobsQuery();
   const { jobs = [], totalJobs } = data || {};
 
-  return isLoading ? (
-    <Loading />
-  ) : (
+  return (
     <Wrapper>
-      {isError && (
-        <Alert
-          type="error"
-          message={(error as CustomError).data.message.toString()}
-        />
-      )}
-
-      {isSuccess && (
-        <>
-          <h5>
-            {totalJobs} job{jobs.length > 1 && "s"} found
-          </h5>
-          <div className="jobs">{jobs.map(Job)}</div>
-        </>
-      )}
+      <h5>
+        {totalJobs} job{jobs.length > 1 && "s"} found
+      </h5>
+      <div className="jobs">
+        {jobs.map((job: Jobs) => (
+          <Job key={job._id} job={job} />
+        ))}
+      </div>
     </Wrapper>
   );
 }
