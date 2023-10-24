@@ -84,7 +84,21 @@ export const updateUser = async (req: Request, res: Response) => {
 
   try {
     // Checking if user exists
-    const user = await User.findById((req as any).user._id);
+    const user = await User.findByIdAndUpdate(
+      (req as any).user._id,
+      {
+        $set: {
+          email: email,
+          name: name,
+          lastName: lastName,
+          location: location,
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!user) {
       res.status(StatusCodes.NOT_FOUND).json({
@@ -94,14 +108,7 @@ export const updateUser = async (req: Request, res: Response) => {
       throw new AppError("User not found!", StatusCodes.NOT_FOUND);
     }
 
-    // Update user fields
-    user.email = email;
-    user.name = name;
-    user.lastName = lastName;
-    user.location = location;
-
-    // Save the updated user
-    await user.save();
+    console.log(user);
 
     const token = user.createAuthToken();
 
@@ -126,6 +133,17 @@ export const updateUser = async (req: Request, res: Response) => {
       message: "Unable to update user!",
     });
   }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  res.cookie("token", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+
+  res.status(StatusCodes.OK).json({
+    status: "success",
+  });
 };
 
 export const authenticatedUser = async (

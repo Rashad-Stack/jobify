@@ -32,7 +32,7 @@ export const getAllJobs = async (req: Request, res: Response) => {
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
   const skip = (page - 1) * limit;
-  const queries = { ...req.query };
+  let queries = { ...req.query };
   // Deleting excludeField match items from queries
   const excludeFields = ["page", "sort", "limit", "search"];
   excludeFields.forEach((item) => delete queries[item]);
@@ -77,17 +77,27 @@ export const getAllJobs = async (req: Request, res: Response) => {
   const jobs = await result;
 
   // get total jobs count
-  const totalJobs = await Job.countDocuments({ createdBy: userId, ...queries });
-  const pages = Math.ceil(totalJobs / limit);
+  let totalJobs;
+  if (req.query.search && req.query.search !== "null") {
+    totalJobs = await Job.find({
+      $or: [
+        { position: { $regex: req.query.search, $options: "i" } },
+        { company: { $regex: req.query.search, $options: "i" } },
+      ],
+    }).countDocuments({ createdBy: userId, ...queries });
+  } else {
+    totalJobs = await Job.countDocuments({ createdBy: userId, ...queries });
+  }
 
-  console.log(totalJobs);
+  // get total pages
+  const pages = Math.ceil(totalJobs / limit);
 
   res.status(StatusCodes.OK).json({ jobs, pages, totalJobs });
 };
 
 export const getJob = async (req: Request, res: Response) => {
   const id = req.params.id;
-  console.log(id);
+
   const job = await Job.findOne({
     _id: id,
     createdBy: (req as any).user._id,
@@ -130,13 +140,13 @@ export const updateJob = async (req: Request, res: Response) => {
     createdBy: (req as any).user._id,
   });
   if (!authorizeJob) {
-    res.status(StatusCodes.UNAUTHORIZED).json({
+    res.status(StatusCodes.NOT_FOUND).json({
       status: "error",
       message: "you are not authorized or Job no longer exists!",
     });
     throw new AppError(
       "you are not authorized or Job no longer exists!",
-      StatusCodes.UNAUTHORIZED
+      StatusCodes.NOT_FOUND
     );
   }
 
@@ -152,9 +162,6 @@ export const updateJob = async (req: Request, res: Response) => {
     });
     throw new AppError("Job no longer exists!", StatusCodes.NOT_FOUND);
   }
-
-  console.log(job);
-
   res.status(StatusCodes.OK).json(job);
 };
 export const deleteJob = async (req: Request, res: Response) => {
@@ -174,13 +181,13 @@ export const deleteJob = async (req: Request, res: Response) => {
     createdBy: (req as any).user._id,
   });
   if (!authorizeJob) {
-    res.status(StatusCodes.UNAUTHORIZED).json({
+    res.status(StatusCodes.NOT_FOUND).json({
       status: "error",
       message: "you are not authorized or Job no longer exists!",
     });
     throw new AppError(
       "you are not authorized or Job no longer exists!",
-      StatusCodes.UNAUTHORIZED
+      StatusCodes.NOT_FOUND
     );
   }
 

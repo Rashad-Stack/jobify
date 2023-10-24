@@ -1,7 +1,10 @@
 import { useGetStatsQuery } from "../features/job/jobApi";
 
 export default function useStats() {
-  const { data, isSuccess } = useGetStatsQuery(undefined, {});
+  const { data, isLoading, isError, error, isSuccess } = useGetStatsQuery(
+    undefined,
+    {}
+  );
 
   const stats = data?.defaultStats;
   const weeklyApplications = data?.weeklyApplications;
@@ -9,6 +12,9 @@ export default function useStats() {
   return {
     stats,
     weeklyApplications,
+    isLoading,
+    isError,
+    error,
     isSuccess,
   };
 }

@@ -8,6 +8,7 @@ const Loader = styled.span`
   span {
     display: block;
     width: 20px;
+    height: 20px;
     padding: 4px;
     aspect-ratio: 1;
     border-radius: 50%;

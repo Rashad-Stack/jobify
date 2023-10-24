@@ -1,6 +1,9 @@
 import { FaBug, FaCalendarCheck, FaSuitcaseRolling } from "react-icons/fa";
 import styled from "styled-components";
 import useStats from "../hooks/useStats";
+import { CustomError } from "../types";
+import ErrorMsg from "./ErrorMsg";
+import LoadingBig from "./LoadingBig";
 import StatItem from "./StatItem";
 
 const Wrapper = styled.section`
@@ -16,7 +19,7 @@ const Wrapper = styled.section`
   }
 `;
 export default function StatsContainer() {
-  const { stats } = useStats();
+  const { stats, isLoading, isError, error, isSuccess } = useStats();
 
   const defaultStats = [
     {
@@ -42,11 +45,17 @@ export default function StatsContainer() {
     },
   ];
 
-  return (
+  return isLoading ? (
+    <LoadingBig height={30} />
+  ) : isError ? (
+    <ErrorMsg height={30} error={error as CustomError} />
+  ) : isSuccess ? (
     <Wrapper>
       {defaultStats.map((item, index) => {
         return <StatItem key={index} {...item} />;
       })}
     </Wrapper>
+  ) : (
+    <ErrorMsg height={30} msg="No stats data found" />
   );
 }

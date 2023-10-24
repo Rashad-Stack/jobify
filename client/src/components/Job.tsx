@@ -1,10 +1,13 @@
 import moment from "moment";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 import { FaBriefcase, FaCalendarAlt, FaLocationArrow } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useDeleteJobMutation } from "../features/job/jobApi";
 import { Jobs } from "../types";
 import JobInfo from "./JobInfo";
+import LoaderSmall from "./LoaderSmall";
 
 const Wrapper = styled.article`
   background: var(--white);
@@ -87,6 +90,10 @@ const Wrapper = styled.article`
   }
   footer {
     margin-top: 1rem;
+    .actions {
+      display: flex;
+      align-items: center;
+    }
   }
   .edit-btn,
   .delete-btn {
@@ -103,6 +110,7 @@ const Wrapper = styled.article`
     color: var(--red-dark);
     background: var(--red-light);
   }
+
   &:hover .actions {
     visibility: visible;
   }
@@ -116,9 +124,14 @@ export default function Job({ job }: JobProps) {
   const { _id, position, jobType, company, location, status, createdAt } =
     job || {};
 
-  const [deleteJob] = useDeleteJobMutation();
+  const [deleteJob, { isSuccess, isLoading, isError }] = useDeleteJobMutation();
 
   let date = moment(createdAt).format("dddd, MMMM Do YYYY");
+
+  useEffect(() => {
+    if (isSuccess) toast.success("Job deleted successfully");
+    if (isError) toast.error("Failed to delete job");
+  }, [isSuccess, isError]);
 
   return (
     <Wrapper key={_id}>
@@ -144,8 +157,9 @@ export default function Job({ job }: JobProps) {
             <button
               type="button"
               className="btn delete-btn"
-              onClick={() => deleteJob(_id)}>
-              Delete
+              onClick={() => deleteJob(_id)}
+              disabled={isLoading}>
+              {isLoading ? <LoaderSmall title="Deleting..." /> : "Delete"}
             </button>
           </div>
         </footer>

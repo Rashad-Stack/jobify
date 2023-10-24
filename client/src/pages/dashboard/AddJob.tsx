@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
-
 import { useNavigate, useParams } from "react-router-dom";
+
 import Alert from "../../components/Alert";
 import DashboardFormWrapper from "../../components/DashboardFormWrapper";
 import FormRow from "../../components/FormRow";
 import FormRowSelect from "../../components/FormRowSelect";
 import LoaderSmall from "../../components/LoaderSmall";
+import LoadingBig from "../../components/LoadingBig";
 import { jobStatus, jobTypes } from "../../constants";
 import { selectUser } from "../../features/auth/authSlice";
 import useJob from "../../hooks/useJob";
@@ -25,14 +27,14 @@ export default function AddJob({ isEdit = false }: AddJobProps) {
     createJob,
     updateJob,
     isLoading,
+    getJobIsError,
+    getJobError,
     getJobLoading,
     getJobIsSuccess,
     error,
     isError,
     isSuccess,
   } = useJob(isEdit, params?.id);
-
-  const [successAlert, setSuccessAlert] = useState<boolean>(false);
 
   const [formState, setFormState] = useState({
     position: job?.position || "",
@@ -86,19 +88,11 @@ export default function AddJob({ isEdit = false }: AddJobProps) {
   }
 
   useEffect(() => {
-    setSuccessAlert(true);
-    const timeout = setTimeout(() => {
-      isSuccess && setSuccessAlert(false);
-    }, 1500);
-
     if (isSuccess) {
+      toast.success(isEdit ? "Updated successfully" : "Posted successfully");
       navigate("/all-jobs");
     }
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [isSuccess, navigate]);
+  }, [isEdit, isSuccess, navigate]);
 
   useEffect(() => {
     if (isEdit && getJobIsSuccess) {
@@ -114,7 +108,7 @@ export default function AddJob({ isEdit = false }: AddJobProps) {
   }, [getJobIsSuccess, isEdit, user, job]);
 
   return getJobLoading ? (
-    <h1>Loading...</h1>
+    <LoadingBig height={70} />
   ) : (
     <DashboardFormWrapper>
       <form className="form" onSubmit={handlePostJob}>
@@ -122,7 +116,7 @@ export default function AddJob({ isEdit = false }: AddJobProps) {
 
         {isAlert && <Alert />}
         {isError && <Alert message={error} type="error" />}
-        {isSuccess && successAlert && <Alert type="success" message="Posted" />}
+        {getJobIsError && <Alert message={getJobError} type="error" />}
 
         <div className="form-center">
           <FormRow
@@ -130,6 +124,7 @@ export default function AddJob({ isEdit = false }: AddJobProps) {
             type="text"
             value={position}
             labelText="Position"
+            disabled={isLoading || getJobIsError}
             handleChange={handleChange}
           />
           <FormRow
@@ -137,6 +132,7 @@ export default function AddJob({ isEdit = false }: AddJobProps) {
             type="text"
             value={company}
             labelText="Company"
+            disabled={isLoading || getJobIsError}
             handleChange={handleChange}
           />
           <FormRow
@@ -144,6 +140,7 @@ export default function AddJob({ isEdit = false }: AddJobProps) {
             type="text"
             value={location}
             labelText="Location"
+            disabled={isLoading || getJobIsError}
             handleChange={handleChange}
           />
 
@@ -151,6 +148,7 @@ export default function AddJob({ isEdit = false }: AddJobProps) {
             name="jobType"
             value={jobType}
             labelText="Job Type"
+            disabled={isLoading || getJobIsError}
             handleChange={handleChange}
             options={jobTypes}
           />
@@ -159,6 +157,7 @@ export default function AddJob({ isEdit = false }: AddJobProps) {
             name="status"
             value={status}
             labelText="Job Status"
+            disabled={isLoading || getJobIsError}
             handleChange={handleChange}
             options={jobStatus}
           />
@@ -167,7 +166,7 @@ export default function AddJob({ isEdit = false }: AddJobProps) {
             <button
               type="submit"
               className="btn btn-block submit-btn"
-              disabled={isLoading}>
+              disabled={isLoading || getJobIsError}>
               {isLoading ? (
                 <LoaderSmall title={isEdit ? "Updating" : "Posting"} />
               ) : isEdit ? (

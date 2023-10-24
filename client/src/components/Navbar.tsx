@@ -2,9 +2,10 @@ import { useState } from "react";
 import { FaAlignLeft, FaCaretDown, FaUserCircle } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
-import { clearUser } from "../features/auth/authSlice";
+
 import { toggleSidebar } from "../features/toggler/togglerSlice";
 import Logo from "./Logo";
+import Logout from "./Logout";
 
 const Wrapper = styled.nav`
   height: var(--nav-height);
@@ -89,6 +90,7 @@ const Wrapper = styled.nav`
 `;
 export default function Navbar() {
   const [showLogout, setShowLogout] = useState<boolean>(false);
+
   const dispatch = useDispatch();
 
   return (
@@ -113,11 +115,7 @@ export default function Navbar() {
             <FaCaretDown />
           </button>
           <div className={showLogout ? "dropdown show-dropdown" : "dropdown"}>
-            <button
-              className="dropdown-btn"
-              onClick={() => dispatch(clearUser())}>
-              logout
-            </button>
+            <Logout />
           </div>
         </div>
       </div>

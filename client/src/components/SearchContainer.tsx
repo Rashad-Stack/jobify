@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import FormRow from "./FormRow";
@@ -48,37 +48,61 @@ export default function SearchContainer() {
   const [searchParam, setSearchParam] = useSearchParams();
   const currentSort = searchParam.get("sort");
 
+  const currenSearch = searchParam.get("search");
+  const currenJobType = searchParam.get("jobType");
+  const currenStatus = searchParam.get("status");
+
   const [formState, setFormState] = useState({
-    search: searchParam.get("search") || "",
-    jobType: searchParam.get("jobType") || "all",
-    status: searchParam.get("status") || "all",
-    sort: currentSort || "latest",
+    search: "",
+    jobType: "all",
+    status: "all",
+    sort: "latest",
   });
 
   const { search, jobType, status, sort } = formState;
 
-  function debounce() {
-    let timeoutID: any;
-    return (
-      e:
-        | React.ChangeEvent<HTMLInputElement>
-        | React.ChangeEvent<HTMLSelectElement>
-    ) => {
-      setFormState({ ...formState, [e.target.name]: e.target.value });
+  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    setFormState({ ...formState, [e.target.name]: e.target.value });
+    if (e.target.value === "all" || !e.target.value) {
+      searchParam.delete(e.target.name);
+    } else {
+      searchParam.set(e.target.name, e.target.value);
+    }
+    setSearchParam(searchParam);
+  }
+
+  function debounce(
+    callback: (e: React.ChangeEvent<HTMLInputElement>) => void,
+    delay: number
+  ) {
+    let timeoutID: NodeJS.Timeout;
+
+    return function (e: React.ChangeEvent<HTMLInputElement>) {
+      setFormState({ ...formState, search: e.target.value });
+
       clearTimeout(timeoutID);
+
       timeoutID = setTimeout(() => {
         if (e.target.value === "all" || !e.target.value) {
-          searchParam.delete(e.target.name);
+          searchParam.delete("search");
         } else {
-          searchParam.set(e.target.name, e.target.value);
+          searchParam.set("search", e.target.value);
         }
         setSearchParam(searchParam);
-      }, 500);
+
+        // Call the original callback, passing the debounced event
+        callback(e);
+      }, delay);
     };
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const optimizedDebounce = useMemo(() => debounce(), []);
+  const handleSearchChange = debounce(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      // Do something with the debounced search input
+      console.log("Debounced Search:", e.target.value);
+    },
+    500
+  );
 
   function handleClear() {
     setSearchParam("");
@@ -97,6 +121,15 @@ export default function SearchContainer() {
     }
   }, [currentSort, searchParam, setSearchParam]);
 
+  useEffect(() => {
+    setFormState({
+      search: currenSearch || "",
+      jobType: currenJobType || "all",
+      status: currenStatus || "all",
+      sort: currentSort || "latest",
+    });
+  }, [currenJobType, currenSearch, currenStatus, currentSort]);
+
   return (
     <Wrapper>
       <form className="form">
@@ -108,14 +141,14 @@ export default function SearchContainer() {
             type="text"
             name="search"
             value={search}
-            handleChange={optimizedDebounce}
+            handleChange={handleSearchChange}
           />
           {/* search by status */}
           <FormRowSelect
             labelText="status"
             name="status"
             value={status}
-            handleChange={optimizedDebounce}
+            handleChange={handleChange}
             options={["all", "pending", "interview", "declined"]}
           />
           {/* search by type */}
@@ -123,14 +156,14 @@ export default function SearchContainer() {
             labelText="type"
             name="jobType"
             value={jobType}
-            handleChange={optimizedDebounce}
+            handleChange={handleChange}
             options={["all", "full-time", "part-time", "remote", "internship"]}
           />
           {/* sort */}
           <FormRowSelect
             name="sort"
             value={sort}
-            handleChange={optimizedDebounce}
+            handleChange={handleChange}
             options={["latest", "oldest", "a-z", "z-a"]}
           />
           <button

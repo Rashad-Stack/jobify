@@ -54,6 +54,14 @@ export const authApi = apiSlice.injectEndpoints({
         url: "/auth/logout",
         method: "POST",
       }),
+      async onQueryStarted(data, { queryFulfilled, dispatch }) {
+        try {
+          await queryFulfilled;
+          dispatch(clearUser());
+        } catch (error) {
+          console.error(error);
+        }
+      },
     }),
 
     updateUser: builder.mutation({
@@ -65,6 +73,7 @@ export const authApi = apiSlice.injectEndpoints({
       async onQueryStarted(data, { queryFulfilled, dispatch }) {
         try {
           const { data: auth } = await queryFulfilled;
+          console.log(auth);
           dispatch(
             setUser({
               user: auth.data.user,

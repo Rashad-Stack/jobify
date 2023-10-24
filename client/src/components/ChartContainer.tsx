@@ -1,8 +1,11 @@
 import { useState } from "react";
 import styled from "styled-components";
 import useStats from "../hooks/useStats";
+import { CustomError } from "../types";
 import AreaChartComponent from "./AreaChartComponent";
 import BarChartComponent from "./BarChartComponent";
+import ErrorMsg from "./ErrorMsg";
+import LoadingBig from "./LoadingBig";
 
 const Wrapper = styled.section`
   margin-top: 4rem;
@@ -21,12 +24,17 @@ const Wrapper = styled.section`
   }
 `;
 export default function ChartContainer() {
-  const { weeklyApplications, isSuccess } = useStats();
+  const { weeklyApplications, isLoading, isError, error, isSuccess } =
+    useStats();
   const [barChart, setBarChart] = useState(true);
 
-  return (
+  return isLoading ? (
+    <LoadingBig height={30} />
+  ) : isError ? (
+    <ErrorMsg height={30} error={error as CustomError} />
+  ) : (
     <>
-      {isSuccess && weeklyApplications.length > 0 && (
+      {isSuccess && weeklyApplications.length > 0 ? (
         <Wrapper>
           <h4>Monthly Applications</h4>
           <button type="button" onClick={() => setBarChart(!barChart)}>
@@ -38,6 +46,8 @@ export default function ChartContainer() {
             <AreaChartComponent data={weeklyApplications} />
           )}
         </Wrapper>
+      ) : (
+        <ErrorMsg height={30} msg="No stats data found" />
       )}
     </>
   );

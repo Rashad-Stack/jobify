@@ -2,6 +2,7 @@ type FormRowSelectProps = {
   name: string;
   labelText?: string;
   value: string;
+  disabled?: boolean;
   options: string[];
   handleChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 };
@@ -9,6 +10,7 @@ export default function FormRowSelect({
   name,
   labelText,
   value,
+  disabled,
   handleChange,
   options,
 }: FormRowSelectProps) {
@@ -22,7 +24,8 @@ export default function FormRowSelect({
         value={value}
         onChange={handleChange}
         className="form-select"
-        id={name}>
+        id={name}
+        disabled={disabled}>
         {options.map((option) => (
           <option key={option} value={option}>
             {option}

@@ -3,6 +3,7 @@ interface FormRowProps {
   labelText?: string;
   type: string;
   value: string;
+  disabled?: boolean;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 export default function FormRow({
@@ -10,6 +11,7 @@ export default function FormRow({
   labelText,
   type,
   value,
+  disabled,
   handleChange,
 }: FormRowProps) {
   return (
@@ -23,6 +25,8 @@ export default function FormRow({
         name={name}
         onChange={handleChange}
         className="form-input"
+        autoComplete="off"
+        disabled={disabled}
       />
     </div>
   );

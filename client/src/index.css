@@ -239,6 +239,10 @@ ul {
 .btn-block {
   height: 35px;
 }
+.form-input:disabled,
+.form-select:disabled {
+  cursor: not-allowed;
+}
 .form-row {
   margin-bottom: 1rem;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import Alert from "../../components/Alert";
 import DashboardFormWrapper from "../../components/DashboardFormWrapper";
@@ -12,7 +13,6 @@ export default function Profile() {
   const user = useSelector(selectUser);
   const [updateUser, { isLoading, error, isError, isSuccess }] =
     useUpdateUserMutation();
-  const [successAlert, setSuccessAlert] = useState<boolean>(false);
   const [formState, setFormState] = useState<UsersType>({
     name: user?.name,
     email: user?.email,
@@ -41,15 +41,8 @@ export default function Profile() {
   }
 
   useEffect(() => {
-    setSuccessAlert(true);
-    const timeout = setTimeout(() => {
-      isSuccess && setSuccessAlert(false);
-    }, 1500);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [isSuccess]);
+    if (isSuccess) toast.success("Profile updated!");
+  }, [isError, isSuccess]);
 
   return (
     <DashboardFormWrapper>
@@ -65,10 +58,6 @@ export default function Profile() {
               (error as CustomError)?.data?.toString()
             }
           />
-        )}
-
-        {isSuccess && successAlert && (
-          <Alert type="success" message="Updated!" />
         )}
 
         <div className="form-center">

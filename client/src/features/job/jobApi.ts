@@ -19,6 +19,14 @@ type IGetJobs = {
 
 const jobApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    getJobs: builder.query<IJobs, IGetJobs>({
+      query: ({ status, sort, search, jobType, limit, page }) => ({
+        url: `/jobs?status=${status}&jobType=${jobType}&search=${search}&sort=${sort}&limit=${limit}&page=${page}`,
+        method: "GET",
+      }),
+      providesTags: ["Job"],
+    }),
+
     createJob: builder.mutation<Jobs, Partial<Jobs>>({
       query: (body) => ({
         url: "/jobs",
@@ -26,18 +34,10 @@ const jobApi = apiSlice.injectEndpoints({
         body,
       }),
 
-      async onQueryStarted(data, { queryFulfilled, dispatch }) {
+      invalidatesTags: ["Job"],
+      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
         try {
-          const { data: job } = await queryFulfilled;
-          dispatch(
-            apiSlice.util.updateQueryData(
-              "getJobs" as unknown as never,
-              undefined as unknown as never,
-              (draft: { jobs: Jobs[] }) => {
-                draft?.jobs.push(job);
-              }
-            )
-          );
+          await queryFulfilled;
         } catch (error) {
           if ((error as CustomError).error?.status === 401) {
             dispatch(clearUser());
@@ -45,13 +45,6 @@ const jobApi = apiSlice.injectEndpoints({
           console.error(error);
         }
       },
-    }),
-
-    getJobs: builder.query<IJobs, IGetJobs>({
-      query: ({ status, sort, search, jobType, limit, page }) => ({
-        url: `/jobs?status=${status}&jobType=${jobType}&search=${search}&sort=${sort}&limit=${limit}&page=${page}`,
-        method: "GET",
-      }),
     }),
 
     getJob: builder.query({
@@ -67,25 +60,10 @@ const jobApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body,
       }),
-
+      invalidatesTags: ["Job"],
       async onQueryStarted(arg, { queryFulfilled, dispatch }) {
         try {
-          const { data: updatedJob } = await queryFulfilled;
-
-          dispatch(
-            apiSlice.util.updateQueryData(
-              "getJobs" as unknown as never,
-              undefined as unknown as never,
-              (draft: { jobs: Jobs[] }) => {
-                const draftedJob: Jobs | undefined = draft?.jobs.find(
-                  (job) => job._id === updatedJob._id
-                );
-
-                if (!draftedJob) return;
-                Object.assign(draftedJob, updatedJob);
-              }
-            )
-          );
+          await queryFulfilled;
         } catch (error) {
           if ((error as CustomError).error?.status === 401) {
             dispatch(clearUser());
@@ -100,25 +78,10 @@ const jobApi = apiSlice.injectEndpoints({
         url: `/jobs/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Job"],
       async onQueryStarted(arg, { queryFulfilled, dispatch }) {
         try {
           await queryFulfilled;
-
-          dispatch(
-            apiSlice.util.updateQueryData(
-              "getJobs" as unknown as never,
-              undefined as unknown as never,
-              (draft: { jobs: Jobs[]; totalJobs: number }) => {
-                const jobIndex = draft?.jobs.findIndex(
-                  (job) => job._id === arg
-                );
-
-                if (jobIndex !== -1) {
-                  draft.jobs.splice(jobIndex, 1);
-                }
-              }
-            )
-          );
         } catch (error) {
           if ((error as CustomError).error?.status === 401) {
             dispatch(clearUser());

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import Alert from "../components/Alert";
 import FormRow from "../components/FormRow";
+import LoaderSmall from "../components/LoaderSmall";
 import Logo from "../components/Logo";
 import useAuth from "../hooks/useAuth";
 import { RegisterState } from "../types";
@@ -78,10 +80,15 @@ export default function Register() {
 
   useEffect(
     function () {
-      if (isSuccess) navigate("/");
+      if (isSuccess) {
+        toast.success(
+          values.isMember ? "Logged in successfully" : "Registered successfully"
+        );
+        navigate("/");
+      }
     },
 
-    [isSuccess, navigate]
+    [isSuccess, navigate, values.isMember]
   );
 
   return (
@@ -121,7 +128,15 @@ export default function Register() {
         />
 
         <button type="submit" className="btn btn-block" disabled={isLoading}>
-          {values.isMember ? "Login" : "Register"}
+          {isLoading ? (
+            <LoaderSmall
+              title={values.isMember ? "Login in..." : "Registering..."}
+            />
+          ) : values.isMember ? (
+            "Login"
+          ) : (
+            "Register"
+          )}
         </button>
 
         <p>
