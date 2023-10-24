@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import { useGetJobsQuery } from "../features/job/jobApi";
 import { Jobs } from "../types";
@@ -25,7 +26,14 @@ const Wrapper = styled.section`
   }
 `;
 export default function JobContainer() {
-  const { data } = useGetJobsQuery();
+  const [searchParam] = useSearchParams();
+
+  const search = searchParam.get("search");
+  const sort = searchParam.get("sort") || "latest";
+  const status = searchParam.get("status") || "all";
+  const jobType = searchParam.get("jobType") || "all";
+
+  const { data } = useGetJobsQuery({ status, sort, jobType, search });
   const { jobs = [] } = data || {};
 
   return (

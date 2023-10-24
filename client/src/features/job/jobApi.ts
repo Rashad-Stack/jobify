@@ -8,6 +8,13 @@ type IJobs = {
   page: number;
 };
 
+type IGetJobs = {
+  status: string | null;
+  sort: string | null;
+  search: string | null;
+  jobType: string | null;
+};
+
 const jobApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     createJob: builder.mutation<Jobs, Partial<Jobs>>({
@@ -38,9 +45,9 @@ const jobApi = apiSlice.injectEndpoints({
       },
     }),
 
-    getJobs: builder.query<IJobs, void>({
-      query: () => ({
-        url: "/jobs",
+    getJobs: builder.query<IJobs, IGetJobs>({
+      query: ({ status, sort, search, jobType }) => ({
+        url: `/jobs?status=${status}&jobType=${jobType}&search=${search}&sort=${sort}`,
         method: "GET",
       }),
     }),

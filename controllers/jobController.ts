@@ -28,9 +28,49 @@ export const createJob = async (req: Request, res: Response) => {
   res.status(StatusCodes.CREATED).json(job);
 };
 export const getAllJobs = async (req: Request, res: Response) => {
-  const jobs = await Job.find({ createdBy: (req as any).user._id }).sort({
-    createdAt: -1,
+  const userId = (req as any).user._id;
+  const queries = { ...req.query };
+  // Deleting excludeField match items from queries
+  const excludeFields = ["page", "sort", "limit", "search"];
+  excludeFields.forEach((item) => delete queries[item]);
+  // if query value is null then remove from queries
+  Object.keys(queries).forEach((item) => {
+    if (queries[item] === "all" || !queries[item]) delete queries[item];
   });
+
+  console.log(queries);
+
+  let result = Job.find({ createdBy: userId, ...queries });
+
+  // search
+  if (req.query.search && req.query.search !== "null") {
+    result = result.find({
+      $or: [
+        { position: { $regex: req.query.search, $options: "i" } },
+        { company: { $regex: req.query.search, $options: "i" } },
+      ],
+    });
+  }
+
+  // sorting base on A-Z, Z-A, Latest, Oldest
+  if (req.query.sort || req.query.sort === "null") {
+    let sort = req.query.sort as string;
+    if (sort === "latest") {
+      result = result.sort("-createdAt");
+    }
+    if (sort === "oldest") {
+      result = result.sort("createdAt");
+    }
+    if (sort === "a-z") {
+      result = result.sort("position");
+    }
+    if (sort === "z-a") {
+      result = result.sort("-position");
+    }
+  }
+
+  const jobs = await result;
+
   res.status(StatusCodes.OK).json({ jobs, totalJobs: jobs.length, page: 1 });
 };
 
@@ -221,6 +261,4 @@ export const showStats = async (req: Request, res: Response) => {
     .reverse();
 
   res.status(StatusCodes.OK).json({ defaultStats, weeklyApplications });
-
-  res.send("Show stats");
 };

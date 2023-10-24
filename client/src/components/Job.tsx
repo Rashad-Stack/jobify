@@ -113,7 +113,8 @@ interface JobProps {
 }
 
 export default function Job({ job }: JobProps) {
-  const { _id, jobType, company, location, status, createdAt } = job || {};
+  const { _id, position, jobType, company, location, status, createdAt } =
+    job || {};
 
   const [deleteJob] = useDeleteJobMutation();
 
@@ -124,7 +125,7 @@ export default function Job({ job }: JobProps) {
       <header>
         <div className="main-icon">{company.charAt(0)}</div>
         <div className="info">
-          <h5>{jobType}</h5>
+          <h5>{position}</h5>
           <p>{company}</p>
         </div>
       </header>
