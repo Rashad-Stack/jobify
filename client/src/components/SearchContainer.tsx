@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import FormRow from "./FormRow";
@@ -46,11 +46,13 @@ const Wrapper = styled.section`
 `;
 export default function SearchContainer() {
   const [searchParam, setSearchParam] = useSearchParams();
+  const currentSort = searchParam.get("sort");
+
   const [formState, setFormState] = useState({
     search: searchParam.get("search") || "",
     jobType: searchParam.get("jobType") || "all",
     status: searchParam.get("status") || "all",
-    sort: searchParam.get("sort") || "latest",
+    sort: currentSort || "latest",
   });
 
   const { search, jobType, status, sort } = formState;
@@ -87,6 +89,13 @@ export default function SearchContainer() {
       sort: "latest",
     });
   }
+
+  useEffect(() => {
+    if (!currentSort) {
+      searchParam.set("sort", "latest");
+      setSearchParam(searchParam);
+    }
+  }, [currentSort, searchParam, setSearchParam]);
 
   return (
     <Wrapper>

@@ -5,7 +5,7 @@ import { clearUser } from "../auth/authSlice";
 type IJobs = {
   jobs: Jobs[];
   totalJobs: number;
-  page: number;
+  pages: number;
 };
 
 type IGetJobs = {
@@ -13,6 +13,8 @@ type IGetJobs = {
   sort: string | null;
   search: string | null;
   jobType: string | null;
+  limit: string | null;
+  page: string | null;
 };
 
 const jobApi = apiSlice.injectEndpoints({
@@ -46,8 +48,8 @@ const jobApi = apiSlice.injectEndpoints({
     }),
 
     getJobs: builder.query<IJobs, IGetJobs>({
-      query: ({ status, sort, search, jobType }) => ({
-        url: `/jobs?status=${status}&jobType=${jobType}&search=${search}&sort=${sort}`,
+      query: ({ status, sort, search, jobType, limit, page }) => ({
+        url: `/jobs?status=${status}&jobType=${jobType}&search=${search}&sort=${sort}&limit=${limit}&page=${page}`,
         method: "GET",
       }),
     }),

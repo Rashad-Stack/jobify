@@ -29,6 +29,9 @@ export const createJob = async (req: Request, res: Response) => {
 };
 export const getAllJobs = async (req: Request, res: Response) => {
   const userId = (req as any).user._id;
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
   const queries = { ...req.query };
   // Deleting excludeField match items from queries
   const excludeFields = ["page", "sort", "limit", "search"];
@@ -37,8 +40,6 @@ export const getAllJobs = async (req: Request, res: Response) => {
   Object.keys(queries).forEach((item) => {
     if (queries[item] === "all" || !queries[item]) delete queries[item];
   });
-
-  console.log(queries);
 
   let result = Job.find({ createdBy: userId, ...queries });
 
@@ -69,9 +70,19 @@ export const getAllJobs = async (req: Request, res: Response) => {
     }
   }
 
+  // pagination
+  result = result.skip(skip).limit(limit);
+
+  // get total jobs
   const jobs = await result;
 
-  res.status(StatusCodes.OK).json({ jobs, totalJobs: jobs.length, page: 1 });
+  // get total jobs count
+  const totalJobs = await Job.countDocuments({ createdBy: userId, ...queries });
+  const pages = Math.ceil(totalJobs / limit);
+
+  console.log(totalJobs);
+
+  res.status(StatusCodes.OK).json({ jobs, pages, totalJobs });
 };
 
 export const getJob = async (req: Request, res: Response) => {
