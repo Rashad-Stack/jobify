@@ -16,6 +16,10 @@ import jobRoute from "./routes/jobRoute";
 const app = express();
 app.set("trust proxy", 1);
 
+// only when ready to deploy
+const dirname = path.dirname(process.argv[1]);
+app.use(express.static(path.resolve(dirname, "./client/build")));
+
 // Limit request from same api
 const limit = rateLimit({
   max: 200,
@@ -24,7 +28,6 @@ const limit = rateLimit({
 });
 
 // middleware
-
 app.use(cors());
 app.use(express.json());
 // Security middleware
@@ -39,13 +42,18 @@ if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
 
-const dirname = path.dirname(process.argv[1]);
-// only when ready to deploy
-app.use(express.static(path.resolve(dirname, "./client/build", "index.html")));
-
 // Routes
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/jobs", jobRoute);
+
+// only when ready to deploy
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(dirname, "./client/build", "index.html"), {
+    headers: {
+      "Content-Type": "text/html",
+    },
+  });
+});
 
 // Unhandled error and Routes
 app.use(notFoundMiddleware);

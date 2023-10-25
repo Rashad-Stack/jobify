@@ -43,10 +43,10 @@ export default function useAuth() {
 
   const isLoading = currentUserIsLoading || isRegistering || isLogging;
   const message =
-    (currentUserError as CustomError)?.data?.message.toString() ||
-    (currentUserError as CustomError)?.error?.message.toString() ||
-    (RegisterError as CustomError)?.data?.message.toString() ||
-    (loginError as CustomError)?.data?.message.toString();
+    (currentUserError as CustomError)?.data?.message?.toString() ||
+    (currentUserError as CustomError)?.error?.message?.toString() ||
+    (RegisterError as CustomError)?.data?.message?.toString() ||
+    (loginError as CustomError)?.data?.message?.toString();
 
   const isError = currentUserIsError || isRegisterError || isLoginError;
   const isSuccess = isRegistered || isLoggedIn;
