@@ -164,3 +164,26 @@ export const authenticatedUser = async (
     throw new AppError("Invalid Authentication", StatusCodes.UNAUTHORIZED);
   }
 };
+
+export const getCurrentUser = async (req: Request, res: Response) => {
+  const user = await User.findById((req as any).user._id);
+
+  if (!user) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      status: "error",
+      message: "User not found!",
+    });
+    throw new AppError("User not found!", StatusCodes.NOT_FOUND);
+  }
+
+  res.status(StatusCodes.OK).json({
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      lastName: user.lastName,
+      location: user.location,
+    },
+    location: (req as any).user.location,
+  });
+};

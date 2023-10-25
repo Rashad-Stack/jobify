@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import LoadingBig from "./LoadingBig";
 
 interface ProtectedRouteProps {
   children: JSX.Element;
@@ -20,5 +21,5 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     [user, isLoading, navigate]
   );
 
-  return children;
+  return isLoading ? <LoadingBig height={100} /> : children;
 }

@@ -85,6 +85,26 @@ export const authApi = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    getCurrentUser: builder.query({
+      query: () => "/auth/currentUser",
+      async onQueryStarted(data, { queryFulfilled, dispatch }) {
+        try {
+          const { data: auth } = await queryFulfilled;
+          dispatch(
+            setUser({
+              user: auth.data.user,
+              location: auth.data.location,
+            })
+          );
+        } catch (error) {
+          if ((error as CustomError).error?.status === 401) {
+            dispatch(clearUser());
+          }
+          console.error(error);
+        }
+      },
+    }),
   }),
 });
 
@@ -93,4 +113,5 @@ export const {
   useLoginMutation,
   useLogoutMutation,
   useUpdateUserMutation,
+  useGetCurrentUserQuery,
 } = authApi;

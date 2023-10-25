@@ -79,17 +79,8 @@ export default function SearchContainer() {
 
     return function (e: React.ChangeEvent<HTMLInputElement>) {
       setFormState({ ...formState, search: e.target.value });
-
       clearTimeout(timeoutID);
-
       timeoutID = setTimeout(() => {
-        if (e.target.value === "all" || !e.target.value) {
-          searchParam.delete("search");
-        } else {
-          searchParam.set("search", e.target.value);
-        }
-        setSearchParam(searchParam);
-
         // Call the original callback, passing the debounced event
         callback(e);
       }, delay);
@@ -99,7 +90,12 @@ export default function SearchContainer() {
   const handleSearchChange = debounce(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       // Do something with the debounced search input
-      console.log("Debounced Search:", e.target.value);
+      if (e.target.value === "all" || !e.target.value) {
+        searchParam.delete("search");
+      } else {
+        searchParam.set("search", e.target.value);
+      }
+      setSearchParam(searchParam);
     },
     500
   );

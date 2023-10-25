@@ -1,7 +1,4 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-interface Api {
-  getState(): any; // Replace `any` with the actual return type of `getState`
-}
 
 const apiSlice = createApi({
   reducerPath: "api",

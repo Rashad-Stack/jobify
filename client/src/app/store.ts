@@ -8,7 +8,7 @@ export const store = configureStore({
   middleware(getDefaultMiddleWares) {
     return getDefaultMiddleWares().concat(apiSlice.middleware);
   },
-  devTools: true,
+  devTools: process.env.NODE_ENV !== "production",
 });
 
 export const persistor = persistStore(store);
