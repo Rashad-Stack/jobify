@@ -10,15 +10,15 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const navigate = useNavigate();
 
   // 1) Load the authenticated user
-  const { isLoading, user } = useAuth();
+  const { isLoading, currentUserIsLoading, user } = useAuth();
 
   // 2) If there is no authenticated user, redirect to the login page
 
   useEffect(
     function () {
-      if (!isLoading && !user) navigate("/landing");
+      if (!isLoading && !currentUserIsLoading && !user) navigate("/landing");
     },
-    [user, isLoading, navigate]
+    [user, isLoading, navigate, currentUserIsLoading]
   );
 
   return isLoading ? <LoadingBig height={100} /> : children;

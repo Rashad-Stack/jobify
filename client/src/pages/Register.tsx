@@ -75,7 +75,7 @@ export default function Register() {
   }
 
   function toggleMember() {
-    setValues({ ...values, isMember: !values.isMember });
+    setValues({ ...values, isMember: !values.isMember, isAlert: false });
   }
 
   useEffect(

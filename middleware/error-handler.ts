@@ -40,8 +40,6 @@ const errorHandlerMiddleWare = (
 ) => {
   let error: any = { ...err };
 
-  console.log(err);
-
   error.statuscode = err.statuscode || 500;
   error.status = err.status || "error";
   error.message = err.message || "Something went very wrong!";

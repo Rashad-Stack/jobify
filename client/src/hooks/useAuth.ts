@@ -41,7 +41,7 @@ export default function useAuth() {
   // Current logged in user
   const user = useSelector(selectUser);
 
-  const isLoading = currentUserIsLoading || isRegistering || isLogging;
+  const isLoading = isRegistering || isLogging;
   const message =
     (currentUserError as CustomError)?.data?.message?.toString() ||
     (currentUserError as CustomError)?.error?.message?.toString() ||
@@ -55,6 +55,7 @@ export default function useAuth() {
     register,
     login,
     isLoading,
+    currentUserIsLoading,
     isError,
     error: message,
     isSuccess,
