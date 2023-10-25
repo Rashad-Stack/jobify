@@ -9,13 +9,12 @@ import { CustomError } from "../types";
 
 export default function useAuth() {
   // Check if user is logged in
-  const {
-    isLoading: currentUserIsLoading,
-    isError: currentUserIsError,
-    error: currentUserError,
-  } = useGetCurrentUserQuery(undefined, {
-    skip: false,
-  });
+  const { isLoading: currentUserIsLoading } = useGetCurrentUserQuery(
+    undefined,
+    {
+      skip: false,
+    }
+  );
 
   // Register mutation hook
   const [
@@ -43,12 +42,10 @@ export default function useAuth() {
 
   const isLoading = isRegistering || isLogging;
   const message =
-    (currentUserError as CustomError)?.data?.message?.toString() ||
-    (currentUserError as CustomError)?.error?.message?.toString() ||
     (RegisterError as CustomError)?.data?.message?.toString() ||
     (loginError as CustomError)?.data?.message?.toString();
 
-  const isError = currentUserIsError || isRegisterError || isLoginError;
+  const isError = isRegisterError || isLoginError;
   const isSuccess = isRegistered || isLoggedIn;
 
   return {

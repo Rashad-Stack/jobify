@@ -10,9 +10,8 @@ const dbCastError = (err: mongoose.Error.CastError) => {
 
 const handleDuplicateFieldsDB = (err: mongoose.Error) => {
   const valueMatch = err.message.match(/(["'])(\\?.)*?\1/);
-  const value = valueMatch ? valueMatch[0] : "";
-
-  const message = `Duplicate field value: ${value}. Please use another value!`;
+  const value = valueMatch ? valueMatch[0].replace(/['"]+/g, "") : "";
+  const message = `This email: ${value} already exists. Please use another one!`;
   return new AppError(message, StatusCodes.BAD_REQUEST);
 };
 
@@ -36,7 +35,7 @@ const handleJWTExpiredError = () =>
 const sendErrorDev = (err: any, req: Request, res: Response) => {
   // A) API
   if (req.originalUrl.startsWith("/api")) {
-    return res.status(err.statusCode).json({
+    return res.status(err.statuscode).json({
       status: err.status,
       error: err,
       message: err.message,
@@ -46,9 +45,9 @@ const sendErrorDev = (err: any, req: Request, res: Response) => {
 
   // B) RENDERED WEBSITE
   console.error("ERROR 💥", err);
-  return res.status(err.statusCode).render("error", {
+  return res.status(err.statuscode).render("error", {
     title: "Something went wrong!",
-    msg: err.message,
+    message: err.message,
   });
 };
 
@@ -58,7 +57,7 @@ const sendErrorProd = (err: any, req: Request, res: Response) => {
   if (req.originalUrl.startsWith("/api")) {
     // A) Operational, trusted error: send message to client
     if (err.isOperational) {
-      return res.status(err.statusCode).json({
+      return res.status(err.statuscode).json({
         status: err.status,
         message: err.message,
       });

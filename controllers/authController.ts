@@ -4,14 +4,20 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import User from "../models/user";
 import AppError from "../utils/appError";
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
     res.status(StatusCodes.BAD_REQUEST).json({
       status: "error",
       message: "Please provide all values!",
     });
-    throw new AppError("Please provide all values!", StatusCodes.BAD_REQUEST);
+    return next(
+      new AppError("Please provide all values!", StatusCodes.BAD_REQUEST)
+    );
   }
 
   // Creating  new user
@@ -30,14 +36,20 @@ export const register = async (req: Request, res: Response) => {
   });
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { email, password } = req.body;
   if (!email || !password) {
     res.status(StatusCodes.BAD_REQUEST).json({
       status: "error",
       message: "Please provide all values!",
     });
-    throw new AppError("Please provide all values!", StatusCodes.BAD_REQUEST);
+    return next(
+      new AppError("Please provide all values!", StatusCodes.BAD_REQUEST)
+    );
   }
 
   const user = await User.findOne({ email }).select("+password");
@@ -47,7 +59,7 @@ export const login = async (req: Request, res: Response) => {
       status: "error",
       message: "User not found!",
     });
-    throw new AppError("User not found!", StatusCodes.NOT_FOUND);
+    return next(new AppError("User not found!", StatusCodes.NOT_FOUND));
   }
 
   const isMatch = await user.comparePassword(password);
@@ -56,7 +68,9 @@ export const login = async (req: Request, res: Response) => {
       status: "error",
       message: "Invalid email or password!",
     });
-    throw new AppError("Invalid email or password!", StatusCodes.BAD_REQUEST);
+    return next(
+      new AppError("Invalid email or password!", StatusCodes.BAD_REQUEST)
+    );
   }
 
   const token = user.createAuthToken();
@@ -73,7 +87,11 @@ export const login = async (req: Request, res: Response) => {
   });
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { email, name, lastName, location } = req.body;
 
   // Fields checking
@@ -82,7 +100,9 @@ export const updateUser = async (req: Request, res: Response) => {
       status: "error",
       message: "Please provide all values!",
     });
-    throw new AppError("Please provide all values!", StatusCodes.BAD_REQUEST);
+    return next(
+      new AppError("Please provide all values!", StatusCodes.BAD_REQUEST)
+    );
   }
 
   try {
@@ -108,7 +128,7 @@ export const updateUser = async (req: Request, res: Response) => {
         status: "error",
         message: "User not found!",
       });
-      throw new AppError("User not found!", StatusCodes.NOT_FOUND);
+      return next(new AppError("User not found!", StatusCodes.NOT_FOUND));
     }
 
     const token = user.createAuthToken();
@@ -154,18 +174,26 @@ export const authenticatedUser = async (
 ) => {
   const token = req.cookies.token;
   if (!token) {
-    throw new AppError("Invalid Authentication", StatusCodes.UNAUTHORIZED);
+    return next(
+      new AppError("Invalid Authentication", StatusCodes.UNAUTHORIZED)
+    );
   }
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
     (req as any).user = { _id: payload.id };
     next();
   } catch (error) {
-    throw new AppError("Invalid Authentication", StatusCodes.UNAUTHORIZED);
+    return next(
+      new AppError("Invalid Authentication", StatusCodes.UNAUTHORIZED)
+    );
   }
 };
 
-export const getCurrentUser = async (req: Request, res: Response) => {
+export const getCurrentUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const user = await User.findById((req as any).user._id);
 
   if (!user) {
@@ -173,7 +201,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
       status: "error",
       message: "User not found!",
     });
-    throw new AppError("User not found!", StatusCodes.NOT_FOUND);
+    return next(new AppError("User not found!", StatusCodes.NOT_FOUND));
   }
 
   res.status(StatusCodes.OK).json({
@@ -184,6 +212,6 @@ export const getCurrentUser = async (req: Request, res: Response) => {
       lastName: user.lastName,
       location: user.location,
     },
-    location: (req as any).user.location,
+    location: user.location,
   });
 };

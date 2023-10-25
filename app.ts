@@ -38,6 +38,7 @@ app.use(hpp());
 app.use(limit);
 
 // logger
+
 if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
@@ -49,9 +50,9 @@ app.use("/api/v1/jobs", jobRoute);
 // only when ready to deploy
 app.get("*", (req, res) => {
   res.sendFile(path.resolve(dirname, "./client/build", "index.html"), {
-    headers: {
-      "Content-Type": "text/html",
-    },
+    // headers: {
+    //   "Content-Type": "text/html",
+    // },
   });
 });
 

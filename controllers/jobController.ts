@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import moment from "moment";
 import mongoose from "mongoose";
@@ -11,7 +11,11 @@ type IStats = {
   declined: number;
 };
 
-export const createJob = async (req: Request, res: Response) => {
+export const createJob = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { position, company } = req.body;
 
   if (!position || !company) {
@@ -19,7 +23,9 @@ export const createJob = async (req: Request, res: Response) => {
       status: "error",
       message: "Please provide all values!",
     });
-    throw new AppError("Please provide all values!", StatusCodes.BAD_REQUEST);
+    return next(
+      new AppError("Please provide all values!", StatusCodes.BAD_REQUEST)
+    );
   }
   req.body.createdBy = (req as any).user._id;
 
@@ -95,7 +101,11 @@ export const getAllJobs = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ jobs, pages, totalJobs });
 };
 
-export const getJob = async (req: Request, res: Response) => {
+export const getJob = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const id = req.params.id;
 
   const job = await Job.findOne({
@@ -108,13 +118,17 @@ export const getJob = async (req: Request, res: Response) => {
       status: "error",
       message: "Job not found!",
     });
-    throw new AppError("Job not found!", StatusCodes.NOT_FOUND);
+    return next(new AppError("Job not found!", StatusCodes.NOT_FOUND));
   }
 
   res.status(StatusCodes.OK).json(job);
 };
 
-export const updateJob = async (req: Request, res: Response) => {
+export const updateJob = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const id = req.params.id;
 
   if (!id) {
@@ -122,7 +136,7 @@ export const updateJob = async (req: Request, res: Response) => {
       status: "error",
       message: "Please provide an ID",
     });
-    throw new AppError("Please provide an ID!", StatusCodes.BAD_REQUEST);
+    return next(new AppError("Please provide an ID!", StatusCodes.BAD_REQUEST));
   }
 
   const { position, company } = req.body;
@@ -131,7 +145,9 @@ export const updateJob = async (req: Request, res: Response) => {
       status: "error",
       message: "Please provide all values!",
     });
-    throw new AppError("Please provide all values!", StatusCodes.BAD_REQUEST);
+    return next(
+      new AppError("Please provide all values!", StatusCodes.BAD_REQUEST)
+    );
   }
 
   // Check if user Authorize to edited the job
@@ -144,9 +160,11 @@ export const updateJob = async (req: Request, res: Response) => {
       status: "error",
       message: "you are not authorized or Job no longer exists!",
     });
-    throw new AppError(
-      "you are not authorized or Job no longer exists!",
-      StatusCodes.NOT_FOUND
+    return next(
+      new AppError(
+        "you are not authorized or Job no longer exists!",
+        StatusCodes.NOT_FOUND
+      )
     );
   }
 
@@ -160,11 +178,15 @@ export const updateJob = async (req: Request, res: Response) => {
       status: "error",
       message: "Job no longer exists!",
     });
-    throw new AppError("Job no longer exists!", StatusCodes.NOT_FOUND);
+    return next(new AppError("Job no longer exists!", StatusCodes.NOT_FOUND));
   }
   res.status(StatusCodes.OK).json(job);
 };
-export const deleteJob = async (req: Request, res: Response) => {
+export const deleteJob = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const id = req.params.id;
 
   if (!id) {
@@ -172,7 +194,7 @@ export const deleteJob = async (req: Request, res: Response) => {
       status: "error",
       message: "Please provide an ID",
     });
-    throw new AppError("Please provide an ID!", StatusCodes.BAD_REQUEST);
+    return next(new AppError("Please provide an ID!", StatusCodes.BAD_REQUEST));
   }
 
   // Check if user Authorize to edited the job
@@ -185,9 +207,11 @@ export const deleteJob = async (req: Request, res: Response) => {
       status: "error",
       message: "you are not authorized or Job no longer exists!",
     });
-    throw new AppError(
-      "you are not authorized or Job no longer exists!",
-      StatusCodes.NOT_FOUND
+    return next(
+      new AppError(
+        "you are not authorized or Job no longer exists!",
+        StatusCodes.NOT_FOUND
+      )
     );
   }
 
@@ -198,7 +222,7 @@ export const deleteJob = async (req: Request, res: Response) => {
       status: "error",
       message: "Job no longer exists!",
     });
-    throw new AppError("Job no longer exists!", StatusCodes.NOT_FOUND);
+    return next(new AppError("Job no longer exists!", StatusCodes.NOT_FOUND));
   }
 
   res.status(StatusCodes.OK).json({
@@ -206,6 +230,7 @@ export const deleteJob = async (req: Request, res: Response) => {
     message: "Job deleted!",
   });
 };
+
 export const showStats = async (req: Request, res: Response) => {
   const stats = await Job.aggregate([
     {
