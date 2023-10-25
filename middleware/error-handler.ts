@@ -54,16 +54,16 @@ const errorHandlerMiddleWare = (
   if (err?.name === "JsonWebTokenError") error = handleJWTError();
   if (err?.name === "TokenExpiredError") error = handleJWTExpiredError();
 
-  res.status(error.statuscode).json({
-    status: error.status,
-    message: error.message,
-  });
-
   console.log({
     status: error.status,
     message: error.message,
     error,
     stack: err.stack,
+  });
+
+  res.status(error.statuscode).json({
+    status: error.status,
+    message: error.message,
   });
 };
 

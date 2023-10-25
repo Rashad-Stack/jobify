@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import User from "../models/user";
 import AppError from "../utils/appError";
 
@@ -17,14 +17,15 @@ export const register = async (req: Request, res: Response) => {
   // Creating  new user
   const user = await User.create({ name, email, password });
   const token = user.createAuthToken();
+  user.sendCookie(res, token);
   res.status(StatusCodes.CREATED).json({
     user: {
+      id: user._id,
       name: user.name,
       email: user.email,
       lastName: user.lastName,
       location: user.location,
     },
-    token,
     location: user.location,
   });
 };
@@ -40,6 +41,7 @@ export const login = async (req: Request, res: Response) => {
   }
 
   const user = await User.findOne({ email }).select("+password");
+
   if (!user) {
     res.status(StatusCodes.NOT_FOUND).json({
       status: "error",
@@ -58,14 +60,15 @@ export const login = async (req: Request, res: Response) => {
   }
 
   const token = user.createAuthToken();
+  user.sendCookie(res, token);
   res.status(StatusCodes.OK).json({
     user: {
+      id: user._id,
       name: user.name,
       email: user.email,
       lastName: user.lastName,
       location: user.location,
     },
-    token,
     location: user.location,
   });
 };
@@ -108,21 +111,19 @@ export const updateUser = async (req: Request, res: Response) => {
       throw new AppError("User not found!", StatusCodes.NOT_FOUND);
     }
 
-    console.log(user);
-
     const token = user.createAuthToken();
-
+    user.sendCookie(res, token);
     res.status(StatusCodes.OK).json({
       status: "success",
       message: "User updated successfully",
       data: {
         user: {
+          id: user._id,
           name: user.name,
           email: user.email,
           lastName: user.lastName,
           location: user.location,
         },
-        token,
         location: user.location,
       },
     });
@@ -151,34 +152,15 @@ export const authenticatedUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.headers.authorization;
-
-  // Check if there is a token
-  if (!authHeader || !authHeader.startsWith("Bearer")) {
-    res.status(StatusCodes.UNAUTHORIZED).json({
-      status: "error",
-      message: "Invalid authentication!",
-    });
-    throw new AppError("Invalid authentication!", StatusCodes.UNAUTHORIZED);
+  const token = req.cookies.token;
+  if (!token) {
+    throw new AppError("Invalid Authentication", StatusCodes.UNAUTHORIZED);
   }
-
-  const token = authHeader.split(" ")[1];
-  // Verify token
-  const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-
-  // Check if there is a user
-  const currentUser = await User.findById(decoded.id);
-  if (!currentUser) {
-    return next(
-      new AppError(
-        "The user belonging to this token does no longer exist!",
-        401
-      )
-    );
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+    (req as any).user = { _id: payload.id };
+    next();
+  } catch (error) {
+    throw new AppError("Invalid Authentication", StatusCodes.UNAUTHORIZED);
   }
-
-  // Set current user
-  (req as any).user = currentUser;
-
-  next();
 };

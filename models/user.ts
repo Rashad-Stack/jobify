@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { Response } from "express";
 import jwt from "jsonwebtoken";
 import mongoose, { Document, Schema } from "mongoose";
 import validator from "validator";
@@ -11,6 +12,7 @@ interface UserTypes extends Document {
   location: string;
   createAuthToken(): string;
   comparePassword(candidatePassword: string): Promise<boolean>;
+  sendCookie(res: Response, token: string): void;
 }
 
 const userSchema: Schema<UserTypes> = new mongoose.Schema({
@@ -65,6 +67,14 @@ userSchema.methods.comparePassword = async function (
   candidatePassword: string
 ) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+userSchema.methods.sendCookie = function (res: Response, token: string) {
+  res.cookie("token", token, {
+    httpOnly: true,
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+    secure: process.env.NODE_ENV === "production",
+  });
 };
 
 const User = mongoose.model<UserTypes>("User", userSchema);

@@ -1,3 +1,4 @@
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import mongoSanitize from "express-mongo-sanitize";
@@ -13,6 +14,7 @@ import jobRoute from "./routes/jobRoute";
 
 // initializing app
 const app = express();
+app.set("trust proxy", 1);
 
 // Limit request from same api
 const limit = rateLimit({
@@ -22,11 +24,13 @@ const limit = rateLimit({
 });
 
 // middleware
+
 app.use(cors());
 app.use(express.json());
 // Security middleware
 app.use(helmet());
 app.use(mongoSanitize());
+app.use(cookieParser());
 app.use(hpp());
 app.use(limit);
 
@@ -37,7 +41,7 @@ if (process.env.NODE_ENV !== "production") {
 
 const dirname = path.dirname(process.argv[1]);
 // only when ready to deploy
-app.use(express.static(path.resolve(dirname, "./client/build")));
+app.use(express.static(path.resolve(dirname, "./client/build", "index.html")));
 
 // Routes
 app.use("/api/v1/auth", authRoute);

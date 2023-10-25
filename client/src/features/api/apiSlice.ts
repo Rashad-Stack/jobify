@@ -6,14 +6,8 @@ interface Api {
 const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:4000/api/v1",
-    async prepareHeaders(headers, { getState }: { getState: Api["getState"] }) {
-      const token = getState()?.auth?.token;
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
+    baseUrl: "/api/v1",
+    credentials: "include",
   }),
   tagTypes: ["Job"],
   endpoints() {

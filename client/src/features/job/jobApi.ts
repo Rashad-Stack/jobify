@@ -25,6 +25,16 @@ const jobApi = apiSlice.injectEndpoints({
         method: "GET",
       }),
       providesTags: ["Job"],
+      async onQueryStarted(data, { queryFulfilled, dispatch }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          if ((error as CustomError).error?.status === 401) {
+            dispatch(clearUser());
+          }
+          console.error(error);
+        }
+      },
     }),
 
     createJob: builder.mutation<Jobs, Partial<Jobs>>({
@@ -52,6 +62,16 @@ const jobApi = apiSlice.injectEndpoints({
         url: `/jobs/${id}`,
         method: "GET",
       }),
+      async onQueryStarted(data, { queryFulfilled, dispatch }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          if ((error as CustomError).error?.status === 401) {
+            dispatch(clearUser());
+          }
+          console.error(error);
+        }
+      },
     }),
 
     updateJob: builder.mutation({
@@ -95,6 +115,16 @@ const jobApi = apiSlice.injectEndpoints({
         url: "/jobs/user/stats",
         method: "GET",
       }),
+      async onQueryStarted(data, { queryFulfilled, dispatch }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          if ((error as CustomError).error?.status === 401) {
+            dispatch(clearUser());
+          }
+          console.error(error);
+        }
+      },
     }),
   }),
 });

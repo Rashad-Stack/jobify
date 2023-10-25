@@ -16,7 +16,6 @@ export const authApi = apiSlice.injectEndpoints({
           dispatch(
             setUser({
               user: auth.user,
-              token: auth.token,
               location: auth.location,
             })
           );
@@ -39,7 +38,6 @@ export const authApi = apiSlice.injectEndpoints({
           dispatch(
             setUser({
               user: auth.user,
-              token: auth.token,
               location: auth.location,
             })
           );
@@ -73,11 +71,9 @@ export const authApi = apiSlice.injectEndpoints({
       async onQueryStarted(data, { queryFulfilled, dispatch }) {
         try {
           const { data: auth } = await queryFulfilled;
-          console.log(auth);
           dispatch(
             setUser({
               user: auth.data.user,
-              token: auth.data.token,
               location: auth.data.location,
             })
           );
